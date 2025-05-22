@@ -16,7 +16,7 @@ def prompt_transfer(stage_name: str, current_status: StageStatus) -> bool:
     return answer in ["", "y", "yes", "ja"]
 
 
-def handle_existing_stages(graph, engine: Engine):
+def handle_existing_stages(graph, engine: Engine, force: bool = False):
     # Handle finished and unfinished stages
     for status in [StageStatus.FINISHED, StageStatus.UNFINISHED]:
         stages = query_existing_experiments(engine=engine, status=status, graph=graph)
@@ -25,8 +25,12 @@ def handle_existing_stages(graph, engine: Engine):
 
         print(f"Found {len(stages)} stages with {status} status from previous runs ")
         for stage in stages:
-            should_transfer = prompt_transfer(stage.name, stage.status)
-            new_status = stage.status if should_transfer else StageStatus.PENDING
+            if force:
+                new_status = StageStatus.PENDING
+            else:
+                should_transfer = prompt_transfer(stage.name, stage.status)
+                new_status = stage.status if should_transfer else StageStatus.PENDING
+                
             node = get_stage_from_graph(graph, stage.name)
             new_stage = dataclasses.replace(node, status=new_status)
             nx.relabel_nodes(graph, {node: new_stage}, copy=False)

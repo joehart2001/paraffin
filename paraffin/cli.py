@@ -221,17 +221,17 @@ def submit(
 
     # TODO: if there is an experiment, set the stages to outdated
     log.debug("Getting status of the pipeline.")
-    graph = get_status(run_cache=dvc_run_cache)
+    graph = get_status(run_cache=dvc_run_cache, force=force)
     log.debug("Setup database .")
 
     engine = create_engine(db)
     SQLModel.metadata.create_all(engine)
     log.debug("handle_existing_stages.")
-    handle_existing_stages(graph=graph, engine=engine)
+    handle_existing_stages(graph=graph, engine=engine, force=force)
     log.debug("update_existing_experiment_stages.")
     update_existing_experiment_stages(engine=engine)
     log.debug("cleanup_stages.")
-    cleanup_stages(graph=graph)
+    cleanup_stages(graph=graph, force=force)
     log.debug("update_max_workers.")
     update_max_workers(graph=graph)
     # print_graph_description(graph)

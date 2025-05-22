@@ -99,7 +99,7 @@ def _restore_and_classify(stage, run_cache: bool) -> StageDC:
         return _create_stage_dc(stage, StageStatus.PENDING)
 
 
-def get_status(run_cache: bool = True, **kwargs) -> nx.DiGraph:
+def get_status(run_cache: bool = True, force: bool = False, **kwargs) -> nx.DiGraph:
     log.debug("Collecting DVC file system")
     fs = dvc.api.DVCFileSystem(**kwargs)
     repo = fs.repo
@@ -118,7 +118,9 @@ def get_status(run_cache: bool = True, **kwargs) -> nx.DiGraph:
         desc="Checking stage status",
         unit="stage",
     ):
-        if stage.addressing in status:
+        if force:
+            results[stage] = _create_stage_dc(stage, StageStatus.PENDING)
+        elif stage.addressing in status:
             results[stage] = _restore_and_classify(stage, run_cache)
         else:
             # Handle stages not in DVC status
@@ -169,7 +171,7 @@ def print_graph_description(graph: nx.DiGraph):
     console.print(table)
 
 
-def cleanup_stages(graph: nx.DiGraph) -> None:
+def cleanup_stages(graph: nx.DiGraph, force: bool = False) -> None:
     import dvc.api
 
     fs = dvc.api.DVCFileSystem()
@@ -177,7 +179,7 @@ def cleanup_stages(graph: nx.DiGraph) -> None:
     stage_addressings = [
         stage.addressing
         for stage in graph.nodes
-        if stage.status in [StageStatus.PENDING, StageStatus.UNKNOWN]
+        if force or stage.status in [StageStatus.PENDING, StageStatus.UNKNOWN]
     ]
 
     graph = fs.repo.index.graph.reverse(copy=True)
