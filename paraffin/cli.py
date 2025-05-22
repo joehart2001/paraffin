@@ -185,14 +185,14 @@ def submit(
     db: str = typer.Option(
         "sqlite:///paraffin.db", help="Database URL.", envvar="PARAFFIN_DB"
     ),
-    # force: bool = typer.Option(
-    #     False,
-    #     "--force",
-    #     "-f",
-    #     help="reproduce pipelines, regenerating its results, even if no changes"
-    #     " were found. See https://dvc.org/doc/command-reference/repro#-f"
-    #     " for more information.",
-    # ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="reproduce pipelines, regenerating its results, even if no changes"
+        " were found. See https://dvc.org/doc/command-reference/repro#-f"
+        " for more information.",
+    ),
     # single_item: bool = typer.Option(
     #     False,
     #     "--single-item",
